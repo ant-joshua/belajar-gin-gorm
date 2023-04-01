@@ -7,15 +7,15 @@ import (
 )
 
 type OrderDetailRepository interface {
-	InsertOrderDetail(ctx context.Context, tx *gorm.DB, order *models.OrderDetail) (*models.OrderDetail, error)
+	InsertOrderDetail(ctx context.Context, order *models.OrderDetail) (*models.OrderDetail, error)
 }
 
 type OrderDetailRepositoryImpl struct {
 	db *gorm.DB
 }
 
-func (o OrderDetailRepositoryImpl) InsertOrderDetail(ctx context.Context, tx *gorm.DB, orderDetail *models.OrderDetail) (*models.OrderDetail, error) {
-	err := tx.Debug().WithContext(ctx).Create(&orderDetail).Error
+func (o OrderDetailRepositoryImpl) InsertOrderDetail(ctx context.Context, orderDetail *models.OrderDetail) (*models.OrderDetail, error) {
+	err := o.db.Debug().WithContext(ctx).Create(&orderDetail).Error
 	if err != nil {
 		return nil, err
 	}

@@ -3,46 +3,66 @@ package main
 import (
 	"belajar-go-orm/controller"
 	"belajar-go-orm/database"
+	"belajar-go-orm/docs"
 	"belajar-go-orm/models"
 	"belajar-go-orm/repository"
 	"belajar-go-orm/service"
+	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/lucsky/cuid"
-	"gorm.io/gorm"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"time"
 )
 
+// @BasePath /api/v1
 func main() {
 	db, err := database.DBConnection()
 	if err != nil {
 		fmt.Println(err)
 	}
 
+	docs.SwaggerInfo.BasePath = "/api/v1"
+
 	orderRepository := repository.NewOrderRepository(db)
 	orderDetailRepository := repository.NewOrderDetailRepository(db)
 
 	orderService := service.NewOrderService(orderRepository, orderDetailRepository)
+	order := models.CreateOrderRequest{
+		Details: []models.CreateOrderDetailRequest{
+			{
+				ProductID: 1,
+				Quantity:  1,
+				Price:     10000,
+			},
+			{
+				ProductID: 2,
+				Quantity:  1,
+				Price:     20000,
+			},
+		},
+		UserID: 1,
+	}
+
+	orderResult, err := orderService.CreateOrder(context.Background(), &order)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("%+v", orderResult)
 
 	// create gin server here
 	startServer := gin.Default()
+	v1 := startServer.Group("/api/v1")
 
 	orderController := controller.NewOrderController(orderService)
-	orderController.Routes(startServer)
+	orderController.Routes(v1)
+
+	startServer.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	startServer.Run(":5000")
 	fmt.Println("Server started at port 5000")
-
-	//order := models.Order{
-	//	OrderCode:  cuid.New(),
-	//	TotalPrice: 0,
-	//	UserID:     1,
-	//}
-	//
-	//orderResult, err := orderService.CreateOrder(context.Background(), &order)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
 
 	//createUser("John Doe", 20)
 	//getUserByID(1)
@@ -70,7 +90,7 @@ func createOrder(userID uint, productID uint) {
 		UserID:     userID,
 		CreatedAt:  time.Time{},
 		UpdatedAt:  time.Time{},
-		DeletedAt:  gorm.DeletedAt{},
+		//DeletedAt:  gorm.DeletedAt{},
 	}
 	err := tx.Debug().Create(&order).Error
 	if err != nil {

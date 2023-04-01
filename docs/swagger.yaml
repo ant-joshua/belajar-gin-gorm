@@ -1,0 +1,163 @@
+basePath: /api/v1
+definitions:
+  models.CreateOrderDetailRequest:
+    properties:
+      price:
+        default: 10000
+        type: integer
+      product_id:
+        default: 1
+        type: integer
+      quantity:
+        default: 1
+        type: integer
+    required:
+    - price
+    - product_id
+    - quantity
+    type: object
+  models.CreateOrderRequest:
+    properties:
+      details:
+        items:
+          $ref: '#/definitions/models.CreateOrderDetailRequest'
+        type: array
+      user_id:
+        type: integer
+    required:
+    - details
+    - user_id
+    type: object
+  models.Order:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: integer
+      order_code:
+        type: string
+      order_detail:
+        items:
+          $ref: '#/definitions/models.OrderDetail'
+        type: array
+      total_price:
+        type: number
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+      user_id:
+        type: integer
+    type: object
+  models.OrderDetail:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: integer
+      order_id:
+        type: integer
+      price:
+        type: integer
+      product:
+        $ref: '#/definitions/models.Product'
+      product_id:
+        type: integer
+      quantity:
+        type: integer
+      sub_total:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.Product:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.User:
+    properties:
+      age:
+        type: integer
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      order:
+        items:
+          $ref: '#/definitions/models.Order'
+        type: array
+      product:
+        items:
+          $ref: '#/definitions/models.Product'
+        type: array
+      updated_at:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /orders:
+    post:
+      consumes:
+      - application/json
+      description: Create Order
+      parameters:
+      - description: Order
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Order'
+      summary: Create Order
+      tags:
+      - Order
+  /orders/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Order By Id
+      parameters:
+      - description: Order Id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Order'
+      summary: Get Order By Id
+      tags:
+      - Order
+swagger: "2.0"

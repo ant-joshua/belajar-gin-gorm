@@ -8,18 +8,42 @@ import (
 
 type OrderController interface {
 	CreateOrder(ctx *gin.Context)
-	Routes(r *gin.Engine)
+	GetOrderById(ctx *gin.Context)
+	Routes(r *gin.RouterGroup)
 }
 
 type OrderControllerImpl struct {
 	orderService service.OrderService
 }
 
-func (o OrderControllerImpl) Routes(r *gin.Engine) {
-	//TODO implement me
-	r.POST("/orders", o.CreateOrder)
+// GetOrderById godoc
+// @Summary Get Order By Id
+// @Description Get Order By Id
+// @Tags Order
+// @Accept json
+// @Produce json
+// @Param id path int true "Order Id"
+// @Success 200 {object} models.Order
+// @Router /orders/{id} [get]
+func (o OrderControllerImpl) GetOrderById(ctx *gin.Context) {
+
 }
 
+func (o OrderControllerImpl) Routes(r *gin.RouterGroup) {
+	//TODO implement me
+	r.POST("/orders", o.CreateOrder)
+	r.GET("/orders/:id", o.GetOrderById)
+}
+
+// CreateOrder godoc
+// @Summary Create Order
+// @Description Create Order
+// @Tags Order
+// @Accept json
+// @Produce json
+// @Param order body models.CreateOrderRequest true "Order"
+// @Success 200 {object} models.Order
+// @Router /orders [post]
 func (o OrderControllerImpl) CreateOrder(ctx *gin.Context) {
 	var request models.CreateOrderRequest
 	err := ctx.ShouldBindJSON(&request)

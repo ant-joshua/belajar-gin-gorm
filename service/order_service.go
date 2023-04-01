@@ -18,9 +18,10 @@ type OrderServiceImpl struct {
 
 func (o OrderServiceImpl) CreateOrder(ctx context.Context, orderRequest *models.CreateOrderRequest) (*models.Order, error) {
 	// begin transaction
-	tx := o.orderRepository.BeginTransaction()
+	tx := o.orderRepository.BeginTransaction(ctx)
 
 	totalPrice := 0
+	orderDetails := make([]models.OrderDetail, 0)
 
 	for _, orderDetail := range orderRequest.Details {
 		totalPrice += orderDetail.Price * orderDetail.Quantity
@@ -33,26 +34,32 @@ func (o OrderServiceImpl) CreateOrder(ctx context.Context, orderRequest *models.
 		UserID:     orderRequest.UserID,
 	}
 
-	orderResult, err := o.orderRepository.InsertOrder(ctx, tx, &order)
+	orderResult, err := o.orderRepository.InsertOrder(ctx, &order)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
 
-	// create order detail here
-	orderDetail := models.OrderDetail{
-		OrderID:   order.ID,
-		ProductID: 5,
-		Quantity:  1,
-		Price:     10000,
-		SubTotal:  10000,
+	for _, orderDetailRequest := range orderRequest.Details {
+		var orderDetail models.OrderDetail = models.OrderDetail{
+			OrderID:   orderResult.ID,
+			ProductID: orderDetailRequest.ProductID,
+			Quantity:  orderDetailRequest.Quantity,
+			Price:     orderDetailRequest.Price,
+		}
+
+		orderDetails = append(orderDetails, orderDetail)
 	}
 
-	_, err = o.orderDetailRepository.InsertOrderDetail(ctx, tx, &orderDetail)
-	if err != nil {
-		tx.Rollback()
-		return nil, err
+	for _, orderDetail := range orderDetails {
+		_, err = o.orderDetailRepository.InsertOrderDetail(ctx, &orderDetail)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
 	}
+
+	orderResult.OrderDetail = orderDetails
 
 	// commit transaction
 	tx.Commit()

@@ -7,20 +7,20 @@ import (
 )
 
 type OrderRepository interface {
-	InsertOrder(ctx context.Context, tx *gorm.DB, order *models.Order) (*models.Order, error)
-	BeginTransaction() *gorm.DB
+	InsertOrder(ctx context.Context, order *models.Order) (*models.Order, error)
+	BeginTransaction(ctx context.Context) *gorm.DB
 }
 
 type OrderRepositoryImpl struct {
 	db *gorm.DB
 }
 
-func (o OrderRepositoryImpl) BeginTransaction() *gorm.DB {
-	return o.db.Begin()
+func (o OrderRepositoryImpl) BeginTransaction(ctx context.Context) *gorm.DB {
+	return o.db.WithContext(ctx).Begin()
 }
 
-func (o OrderRepositoryImpl) InsertOrder(ctx context.Context, tx *gorm.DB, order *models.Order) (*models.Order, error) {
-	err := tx.Debug().WithContext(ctx).Create(&order).Error
+func (o OrderRepositoryImpl) InsertOrder(ctx context.Context, order *models.Order) (*models.Order, error) {
+	err := o.db.Debug().WithContext(ctx).Create(&order).Error
 	if err != nil {
 		return nil, err
 	}
