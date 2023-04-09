@@ -9,21 +9,20 @@ import (
 	"belajar-go-orm/service"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/lucsky/cuid"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"log"
 	"os"
 	"time"
 )
 
 // @BasePath /api/v1
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	//err := godotenv.Load()
+	//if err != nil {
+	//	log.Fatal("Error loading .env file")
+	//}
 	db, err := database.DBConnection()
 	if err != nil {
 		fmt.Println(err)
