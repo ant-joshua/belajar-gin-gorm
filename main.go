@@ -7,7 +7,6 @@ import (
 	"belajar-go-orm/models"
 	"belajar-go-orm/repository"
 	"belajar-go-orm/service"
-	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/lucsky/cuid"
@@ -29,28 +28,28 @@ func main() {
 	orderDetailRepository := repository.NewOrderDetailRepository(db)
 
 	orderService := service.NewOrderService(orderRepository, orderDetailRepository)
-	order := models.CreateOrderRequest{
-		Details: []models.CreateOrderDetailRequest{
-			{
-				ProductID: 1,
-				Quantity:  1,
-				Price:     10000,
-			},
-			{
-				ProductID: 2,
-				Quantity:  1,
-				Price:     20000,
-			},
-		},
-		UserID: 1,
-	}
-
-	orderResult, err := orderService.CreateOrder(context.Background(), &order)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Printf("%+v", orderResult)
+	//order := models.CreateOrderRequest{
+	//	Details: []models.CreateOrderDetailRequest{
+	//		{
+	//			ProductID: 1,
+	//			Quantity:  1,
+	//			Price:     10000,
+	//		},
+	//		{
+	//			ProductID: 2,
+	//			Quantity:  1,
+	//			Price:     20000,
+	//		},
+	//	},
+	//	UserID: 1,
+	//}
+	//
+	//orderResult, err := orderService.CreateOrder(context.Background(), &order)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//
+	//fmt.Printf("%+v", orderResult)
 
 	// create gin server here
 	startServer := gin.Default()

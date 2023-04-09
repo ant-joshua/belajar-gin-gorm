@@ -1,8 +1,11 @@
 package main
 
 import (
+	"belajar-go-orm/cmd/belajar/handlers"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"strings"
 )
@@ -92,9 +95,101 @@ func parseURLString() {
 	fmt.Printf("Tags: %v ", tags)
 }
 
+func curlGetExample() []map[string]interface{} {
+	res, err := http.Get("https://jsonplaceholder.typicode.com/posts")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("%v", res.Body)
+
+	var result []map[string]interface{}
+
+	body, err := io.ReadAll(res.Body)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	defer res.Body.Close()
+
+	json.Unmarshal(body, &result)
+
+	sb := string(body)
+	fmt.Println(sb)
+
+	fmt.Printf("%v", result)
+
+	return result
+}
+
+func curlPostExample() {
+	data := map[string]interface{}{
+		"userId": 1,
+		"title":  "Belajar Golang",
+		"body":   "Belajar Golang itu mudah",
+	}
+
+	payload, err := json.Marshal(data)
+
+	client := &http.Client{}
+
+	//bufferString := bytes.NewBuffer(payload)
+
+	readerString := strings.NewReader(string(payload))
+
+	req, err := http.NewRequest("POST", "https://jsonplaceholder.typicode.com/posts", readerString)
+	req.Header.Set("Content-Type", "application/json")
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	res, err := client.Do(req)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(res)
+
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(string(body))
+}
+
+func initRouting() {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello World")
+	})
+
+	http.HandleFunc("/students", handlers.ActionStudent)
+
+	http.HandleFunc("/posts", func(writer http.ResponseWriter, request *http.Request) {
+		result := curlGetExample()
+		writer.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(writer).Encode(result)
+	})
+
+	server := new(http.Server)
+	server.Addr = ":9000"
+
+	server.ListenAndServe()
+
+}
+
 func main() {
+	//curlPostExample()
+
+	initRouting()
 	//decodeJSONToMap()
 	//decodeJSONToStruct()
 	//encodeStructToJSON()
-	parseURLString()
+	//parseURLString()
 }

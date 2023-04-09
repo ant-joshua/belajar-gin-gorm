@@ -14,6 +14,12 @@ type OrderRepository interface {
 type OrderRepositoryImpl struct {
 	db *gorm.DB
 }
+type testdb struct {
+}
+
+type OrderRepositoryTestImpl struct {
+	db testdb
+}
 
 func (o OrderRepositoryImpl) BeginTransaction(ctx context.Context) *gorm.DB {
 	return o.db.WithContext(ctx).Begin()
