@@ -9,14 +9,21 @@ import (
 	"belajar-go-orm/service"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/lucsky/cuid"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"log"
+	"os"
 	"time"
 )
 
 // @BasePath /api/v1
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	db, err := database.DBConnection()
 	if err != nil {
 		fmt.Println(err)
@@ -60,8 +67,8 @@ func main() {
 
 	startServer.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	startServer.Run(":5000")
-	fmt.Println("Server started at port 5000")
+	startServer.Run(":" + os.Getenv("PORT"))
+	fmt.Println("Server started at port " + os.Getenv("PORT"))
 
 	//createUser("John Doe", 20)
 	//getUserByID(1)
